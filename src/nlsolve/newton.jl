@@ -54,6 +54,8 @@ function (S::NLNewton{false})(integrator)
   ndz = integrator.opts.internalnorm(dz)
   z = z + dz
 
+  f <: AbstractDiffEqOperator && @goto RET
+
   η = max(nlcache.ηold,eps(eltype(integrator.opts.reltol)))^(0.8)
   do_newton = integrator.success_iter == 0 || η*ndz > κtol
 
@@ -81,6 +83,7 @@ function (S::NLNewton{false})(integrator)
     return (z, η, iter, true)
   end
 
+  @label RET
   return (z, η, iter, false)
 end
 
@@ -116,6 +119,8 @@ function (S::NLNewton{true})(integrator)
   end
   ndz = integrator.opts.internalnorm(dz)
   z .+= dz
+
+  f <: AbstractDiffEqOperator && @goto RET
 
   η = max(nlcache.ηold,eps(eltype(integrator.opts.reltol)))^(0.8)
   do_newton = integrator.success_iter == 0 || η*ndz > κtol
@@ -154,5 +159,6 @@ function (S::NLNewton{true})(integrator)
     return (z, η, iter, true)
   end
 
+  @label RET
   return (z, η, iter, false)
 end
